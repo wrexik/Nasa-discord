@@ -70,7 +70,7 @@ client = commands.Bot(command_prefix=bot_prefix, intents=intents)
 @bot.event
 async def on_ready():
     #connect to dc
-    print(f'{bot.user} Je tady ❤️❤️❤️')
+    print(f'{bot.user} je tady ❤️')
     await bot.change_presence(activity=discord.Streaming(name=default_activity, url= twitch_link))
 
 @client.event
@@ -146,6 +146,12 @@ async def cur(ctx, arg1, camera):
                 embed.set_author(name=  bot_name, icon_url= bot_pfp)
                 await ctx.send(embed=embed)
         print(f'{ctx.author} Requested mars pics')
+
+@bot.command()
+async def cameras(ctx):
+    await ctx.send("Possible cameras: ```FHAZ, RHAZ, MAST, CHEMCAM, MAHLI, MARDI, NAVCAM```")
+
+
 
 @bot.command()
 async def apod(ctx):
@@ -371,11 +377,11 @@ async def mars_error(ctx, error):
 @cur.error
 async def mars_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send(f"{ctx.author.mention} make sure you write **$cur [sol date] [camera]**")
+        await ctx.send(f"{ctx.author.mention} make sure you write **!cur [sol date] [camera]**")
 
 @iss.error
 async def mars_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send(f"{ctx.author.mention} make sure you write **$iss location / people**")
+        await ctx.send(f"{ctx.author.mention} make sure you write **!iss location / people**")
 
 bot.run(bot_secret)
