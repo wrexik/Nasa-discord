@@ -254,7 +254,7 @@ async def help_me(ctx):
     embed.add_field(name="APOD", value="Usage: !apod (shows astronomy picture of the day)", inline=False)
     embed.add_field(name="CUR", value="Usage: !cur [sol date number] [camera]. Use !cameras to show list of valid cameras or simply use the command to guide you! :)", inline=False)
     embed.add_field(name="ISS", value="""Usage: !iss ["location" or "people"]. One shows velocity and location of ISS on google maps and the other shows people that are currently on the ISS!""", inline=False)
-    embed.add_field(name="FUN... yeah made sure to include that", value="Usage: use !fun to enable the features for one time only, for another usage you'll need to use !fun again. More info after triggering the command. :) ", inline=False)
+    embed.add_field(name="FUN... yeah made sure to include that", value="Usage: use !fun. More info after triggering the command. :) ", inline=False)
     await ctx.send(embed=embed)
 
 @bot.command()
