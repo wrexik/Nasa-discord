@@ -32,18 +32,17 @@ if not os.path.exists("config.ini"):
 
     config['Options'] = {'bot_name': 'Sitara',
                      'bot_pfp': 'https://i.postimg.cc/63vzgSPN/round-sitara.png',
-                     'default_activity': 'Your Mother',
+                     'default_activity': 'Tvoji Mamu',
                      'twitch_username': 'notwrexik'}
     
-    config['Setup'] = {'bot_secret': 'YOUR SECRET',
+    config['Setup'] = {'bot_secret': 'OTEyNjk1ODE5NDY2MDQ3NTc4.G52aO8.b_BV4W8qECQ8-6O4zM_StuTqjlO0WDK-HfBBk8',
                        'bot_prefix':'!',
-                       'nasa_api_key': 'YOUR NASA API KEY'}
+                       'nasa_api_key': 'V7RJs5F1aEaYhbcejm76DYFlkSvCbzUmywcp8uXu'}
     
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
     print("Done saved as {}".format("config.ini"))
     print("Customize the config to your options and restart the program")
-    print("Get the NASA API key on: https://api.nasa.gov/")
     print("exiting in 5s")
     time.sleep(5)
     exit()
@@ -70,7 +69,7 @@ client = commands.Bot(command_prefix=bot_prefix, intents=intents)
 @bot.event
 async def on_ready():
     #connect to dc
-    print(f'{bot.user} je tady ❤️')
+    print(f'{bot.user} Je tady ❤️❤️❤️')
     await bot.change_presence(activity=discord.Streaming(name=default_activity, url= twitch_link))
 
 @client.event
@@ -146,12 +145,6 @@ async def cur(ctx, arg1, camera):
                 embed.set_author(name=  bot_name, icon_url= bot_pfp)
                 await ctx.send(embed=embed)
         print(f'{ctx.author} Requested mars pics')
-
-@bot.command()
-async def cameras(ctx):
-    await ctx.send("Possible cameras: ```FHAZ, RHAZ, MAST, CHEMCAM, MAHLI, MARDI, NAVCAM```")
-
-
 
 @bot.command()
 async def apod(ctx):
@@ -254,7 +247,7 @@ async def help_me(ctx):
     embed.add_field(name="APOD", value="Usage: !apod (shows astronomy picture of the day)", inline=False)
     embed.add_field(name="CUR", value="Usage: !cur [sol date number] [camera]. Use !cameras to show list of valid cameras or simply use the command to guide you! :)", inline=False)
     embed.add_field(name="ISS", value="""Usage: !iss ["location" or "people"]. One shows velocity and location of ISS on google maps and the other shows people that are currently on the ISS!""", inline=False)
-    embed.add_field(name="FUN... yeah made sure to include that", value="Usage: use !fun. More info after triggering the command. :) ", inline=False)
+    embed.add_field(name="FUN... yeah made sure to include that", value="Usage: use !fun to enable the features for one time only, for another usage you'll need to use !fun again. More info after triggering the command. :) ", inline=False)
     await ctx.send(embed=embed)
 
 @bot.command()
@@ -287,19 +280,20 @@ async def motd(ctx, *args):
 
 @bot.command()
 async def say(ctx, *args):
-    try:
-        await ctx.message.delete()
-        response = ""
-        
-        for arg in args:
-            response = response + " " + arg
-        await ctx.channel.send(response)
-    except discord.Forbidden:
-        response = ""
-        
-        for arg in args:
-            response = response + " " + arg
-        await ctx.channel.send(response)
+    if fun == True:
+        try:
+            await ctx.message.delete()
+            response = ""
+            
+            for arg in args:
+                response = response + " " + arg
+            await ctx.channel.send(response)
+        except discord.Forbidden:
+            response = ""
+            
+            for arg in args:
+                response = response + " " + arg
+            await ctx.channel.send(response)
 
 @bot.command()
 async def sendmsg(ctx):
@@ -360,13 +354,70 @@ async def tts(ctx, *, message: str):
         print(e)
         await ctx.send(f"Error: {e}")
 
-@bot.command()
-async def spider(ctx):
-        try:
-            await ctx.message.delete()
-            await ctx.send("https://cdn.discordapp.com/attachments/524811430923599884/894764730797928478/temp.gif")
-        except discord.Forbidden:
-            await ctx.send("https://cdn.discordapp.com/attachments/524811430923599884/894764730797928478/temp.gif")
+@bot.command(name='play')
+async def play(ctx):
+    # Check if the user is in a voice channel
+    if ctx.author.voice is None or ctx.author.voice.channel is None:
+        await ctx.send("You must be in a voice channel to use this command.")
+        return
+
+    # Get the voice channel of the user
+    channel = ctx.author.voice.channel
+
+    # Join the voice channel
+    vc = await channel.connect()
+
+    try:
+        # Specify the folder name
+        folder_name = 'sounds'
+
+        # List local files in the specified folder
+        files = [f for f in os.listdir(folder_name) if os.path.isfile(os.path.join(folder_name, f)) and f.endswith('.mp3')]
+
+        # If no files are found, inform the user
+        if not files:
+            await ctx.send("No MP3 files found in the 'sounds' folder.")
+            return
+
+        # Number the files and create a list of options
+        files_list = '\n'.join([f"{index + 1}. {file}" for index, file in enumerate(files)])
+        options_message = f"Available files:\n```\n{files_list}\n```"
+        await ctx.send(options_message)
+
+        # Wait for the user to input the corresponding number
+        def check(message):
+            return message.author == ctx.author and message.content.isdigit() and 1 <= int(message.content) <= len(files)
+
+        user_response = await bot.wait_for('message', check=check)
+
+        # Get the selected file index
+        selected_index = int(user_response.content) - 1
+        selected_file = files[selected_index]
+        file_path = os.path.join(folder_name, selected_file)
+
+        # Play the selected audio file
+        vc.play(discord.FFmpegPCMAudio(file_path), after=lambda e: print('done', e))
+
+        # Wait for the playback to finish
+        while vc.is_playing():
+            await asyncio.sleep(1)
+
+        # Disconnect from the voice channel after playback
+        await vc.disconnect()
+
+    except Exception as e:
+        print(e)
+        await ctx.send("Error occurred while playing the sound.")
+
+@bot.command(name='dc')
+async def dc(ctx):
+    # Check if the bot is in a voice channel
+    if ctx.voice_client is not None:
+        # Disconnect from the voice channel
+        await ctx.voice_client.disconnect()
+        await ctx.send("Disconnected from the voice channel.")
+    else:
+        await ctx.send("I am not currently in a voice channel.")
 
 #errors 💀
 @motd.error
@@ -377,11 +428,11 @@ async def mars_error(ctx, error):
 @cur.error
 async def mars_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send(f"{ctx.author.mention} make sure you write **!cur [sol date] [camera]**")
+        await ctx.send(f"{ctx.author.mention} make sure you write **$cur [sol date] [camera]**")
 
 @iss.error
 async def mars_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send(f"{ctx.author.mention} make sure you write **!iss location / people**")
+        await ctx.send(f"{ctx.author.mention} make sure you write **$iss location / people**")
 
 bot.run(bot_secret)
